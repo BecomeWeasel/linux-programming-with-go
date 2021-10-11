@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 )
 
 func findIP(input string) string {
@@ -32,10 +33,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	wf, err := os.OpenFile("report.txt", os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	defer f.Close()
+
+	defer wf.Close()
 
 	ipMap := make(map[string]int)
 	s := bufio.NewScanner(f)
+
+	writer := bufio.NewWriter(wf)
 
 	for s.Scan() {
 		line := s.Text()
@@ -56,6 +67,7 @@ func main() {
 	}
 
 	for key := range ipMap {
-		fmt.Printf("%s %d\n", key, ipMap[key])
+		writer.WriteString(key + " " + strconv.Itoa(ipMap[key]) + "\n")
+		writer.Flush()
 	}
 }
